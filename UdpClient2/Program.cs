@@ -29,18 +29,38 @@ namespace UdpClient2
         static void Main(string[] args)
         {
             //UdpClient 객체 생성 - 13000포트
-
+            UdpClient client = new UdpClient();
             //송신할 멀티캐스트의 IP/PORT 저장할 IPEndPoint 객체 생성
-            
             //멀티 캐스트 IP : 224.0.1.0 PORT : 13000
-
+            IPEndPoint des_ip = new IPEndPoint(IPAddress.Parse("224.0.1.0"), 13000);
             //문자열, byte[], BinaryFormatter, MemoryStream 변수 생성
-            
-            //보낼데이터를 byte[]로 가공
+         
+            for (; ; )
+            {
+                Console.Clear();
+                Console.Write("ID 입력 : ");
+                string id = Console.ReadLine();
+                Console.Write("채팅을 입력하세요 : ");
 
-            //송신
-            
+                string data = string.Format("{0} : {1}", id, Console.ReadLine());
+
+                BinaryFormatter formatter = new BinaryFormatter();
+                MemoryStream stream = new MemoryStream();
+
+                //문자열 데이터를 MemoryStream 객체에 Serialize
+                formatter.Serialize(stream, data);
+
+                //MemoryStream 객체에 저장된 데이터를 byte[]로 변환
+                byte[] byte_data = stream.ToArray();
+
+                //byte[]와 IPEndPoint 객체와 함께 UdpClient 객체로 송신
+                client.Send(byte_data, byte_data.Length, des_ip);
+                
+                stream.Close();
+            }
+
             //UdpClient 객체 연결 종료
+            client.Close();
         }
     }
 }
