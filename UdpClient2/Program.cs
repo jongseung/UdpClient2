@@ -22,7 +22,39 @@ namespace UdpClient2
     {
         static void Main(string[] args)
         {
-            
+            //UdpClient 객체 생성
+            UdpClient sender = new UdpClient();
+            //sender.EnableBroadcast : 해당 UDP소켓이 브로드캐스트를 사용하는지 설정하는 변수
+            //true (기본값) : 브로드캐스트 허용
+            //false : 브로드캐스트로 송신하거나 수신하지 못하도록 설정
+
+            //IPEndPoint 객체 생성 - 브로드캐스트 설정 및 12000번 포트로 설정
+            //전송할 대상의 IP를 255.255.255.255로 설정하면 브로드캐스트로 송신하게 됨 
+            IPEndPoint des_ip = new IPEndPoint(IPAddress.Parse("255.255.255.255"), 12000);
+
+            Console.Write("ID 입력 : ");
+            string id = Console.ReadLine();
+            for (; ; )
+            {
+
+                //보낼 데이터를 저장한 문자열변수 선언 및 초기화
+                Console.Write("채팅 입력 : ");
+
+                string data = string.Format("{0} : {1}", id, Console.ReadLine());
+
+                BinaryFormatter formatter = new BinaryFormatter();
+                MemoryStream stream = new MemoryStream();
+
+                //네트워크에 UDP 소켓으로 송신
+
+                formatter.Serialize(stream, data);
+                byte[] send_data = stream.ToArray();
+                sender.Send(send_data, send_data.Length, des_ip);
+                stream.Close();
+            }
+            //UdpClient 객체 종료
+            sender.Close();
+
         }
     }
 }
