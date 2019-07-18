@@ -10,10 +10,16 @@ using System.Threading;
 using System.Threading.Tasks;
 
 /* 
- * 브로드캐스트 : 해당 컴퓨터가 속한 네트워크 영역에 연결된 모든 컴퓨터/ 스마트폰/ 인터넷 장비에게 동일한 데이터를 동일한 포트로 송신하는 기능
- * 이 데이터를 받는 장치들은 포트번호를 고정한 UDP 소켓을 생성해 수신을 대기
- * 단점 : 해당 데이터를 받는 장치나 안받는 장치에 상관없이 모든 장치에 데이터를 송신하기 때문에 해당 네트워크 영역에 부하가 발생
- * UDP 송신 프로그램 - 브로드캐스트를 통해 데이터를송신
+ * 멀티캐스트 : 224.0.1.0 - 239.255.255.255 중 특정 네트워크에 가입해 1대다 통신을 사용하는 기법.
+ * 224.0.0.0 ~ 244.0.0.255는 네트워크 장치가 사용하는 영역으로 멀티캐스트에 가입할수 없다.
+ * 멀티캐스트에 가입할 수 있는 소켓은 UDP 소켓만 가입가능. UDP 소켓은 여러개의 멀티캐스트를 가입할수 있고, 탈퇴가 자유로움. 가입된 멀티캐스트로 들어오는 데이터를 수신 할 수 있으나 포트번호가 다르면 수신받을 수 없음.
+ * 멀티캐스트 그룹으로 데이터 송신시 IP설정을 멀티캐스트의 IP로 설정해 데이터 송신
+ * 멀티캐스트는 다른 네트워크 영역에 있는 UDP소켓에게 전달 할 수 있음.
+ * TTL (Time TO Live) : 네트워크 장비(라우터)를 거칠때마다 TTL값이 1씩 감소해 TTL이 0이되면 데이터가 소멸됨, TTL을 높힐수록 물리적으로 멀리 떨어진 UDP소켓에게 데이터를 전송이 가능함
+ * 
+ * 예제로 배우는 C# , Topcit, 소켓 교재를 이용하면 더 자세히 알 수 있다.
+ * 
+ * UDP 송신 프로그램 - 멀티케스트를 통해 데이터를 송신
  */
 
 namespace UdpClient2
@@ -22,39 +28,19 @@ namespace UdpClient2
     {
         static void Main(string[] args)
         {
-            //UdpClient 객체 생성
-            UdpClient sender = new UdpClient();
-            //sender.EnableBroadcast : 해당 UDP소켓이 브로드캐스트를 사용하는지 설정하는 변수
-            //true (기본값) : 브로드캐스트 허용
-            //false : 브로드캐스트로 송신하거나 수신하지 못하도록 설정
+            //UdpClient 객체 생성 - 13000포트
 
-            //IPEndPoint 객체 생성 - 브로드캐스트 설정 및 12000번 포트로 설정
-            //전송할 대상의 IP를 255.255.255.255로 설정하면 브로드캐스트로 송신하게 됨 
-            IPEndPoint des_ip = new IPEndPoint(IPAddress.Parse("255.255.255.255"), 12000);
+            //송신할 멀티캐스트의 IP/PORT 저장할 IPEndPoint 객체 생성
+            
+            //멀티 캐스트 IP : 224.0.1.0 PORT : 13000
 
-            Console.Write("ID 입력 : ");
-            string id = Console.ReadLine();
-            for (; ; )
-            {
+            //문자열, byte[], BinaryFormatter, MemoryStream 변수 생성
+            
+            //보낼데이터를 byte[]로 가공
 
-                //보낼 데이터를 저장한 문자열변수 선언 및 초기화
-                Console.Write("채팅 입력 : ");
-
-                string data = string.Format("{0} : {1}", id, Console.ReadLine());
-
-                BinaryFormatter formatter = new BinaryFormatter();
-                MemoryStream stream = new MemoryStream();
-
-                //네트워크에 UDP 소켓으로 송신
-
-                formatter.Serialize(stream, data);
-                byte[] send_data = stream.ToArray();
-                sender.Send(send_data, send_data.Length, des_ip);
-                stream.Close();
-            }
-            //UdpClient 객체 종료
-            sender.Close();
-
+            //송신
+            
+            //UdpClient 객체 연결 종료
         }
     }
 }
